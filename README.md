@@ -2,7 +2,7 @@
 
 Upload a go module to automatically run unit tests with detailed testing and performance reports
 
-View
+Reports include: 
 - Test Coverage
 - Memory usage - based on benchmark tests
 - CPU usage - based on benchmark tests
