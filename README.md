@@ -1,11 +1,13 @@
 # GoPerfDashboard
 
-Upload a go module to automatically run unit tests with detailed testing and performance reports
+Upload a go module to automatically run unit tests with detailed testing and performance reports.
 
 Reports include: 
 - Test Coverage
 - Memory usage - based on benchmark tests
 - CPU usage - based on benchmark tests
+
+All reports are generated using the "go" command
 
 ## Test coverage
 ![image](https://user-images.githubusercontent.com/98064546/169572295-f53ceeb8-572d-469c-a731-2f48241327f7.png)
