@@ -1,0 +1,4 @@
+- Deploy testrunner and server in separate containers
+- Set up gRPC for communication between containers
+- Deploy containers to local kubernetes cluster
+- Deploy containers to AKS

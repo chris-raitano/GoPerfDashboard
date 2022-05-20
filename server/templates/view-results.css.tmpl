@@ -1,0 +1,70 @@
+{{define "resultsStyles"}}
+.report-tabs {
+  display: flex;
+  width: 100%;
+}
+
+.report-select-tab {
+  cursor: pointer;
+  padding: 3px 7px;
+  border-left: 5px solid
+}
+
+.red-tab {
+  border-left-color: #f56d6d;
+  background-color: #ffd7d7;
+}
+
+.red-tab:hover {
+  background-color: #ffecec;
+}
+
+.green-tab {
+  border-left-color: #4d833d;
+  background-color: #a8d39b;
+}
+
+.green-tab:hover {
+  background-color: #b8daae;
+}
+
+.blue-tab {
+  border-left-color: #6da0f5;
+  background-color: #c4d9fb;
+}
+
+.blue-tab:hover {
+  background-color: #d8e0ed;
+}
+
+.tab-strip-filler {
+  width: 100%;
+  border-bottom: 2px solid #ddd;
+}
+
+.back-button {
+  border-left-color: #ddd;
+  border-bottom: 2px solid #ddd;
+}
+
+html,
+body {
+  margin: 0px;
+  padding: 0px;
+  height: 100%;
+  border: none;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+html {
+  overflow: hidden;
+}
+
+#results-frame {
+  border: none;
+}
+{{end}}

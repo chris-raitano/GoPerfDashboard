@@ -1,0 +1,7 @@
+// Code generated automatically; DO NOT EDIT.
+package {{.ModName}}
+//go:generate go test -coverprofile={{.Files.CoverProf}}
+//go:generate go tool cover -html={{.Files.CoverProf}} -o {{.Files.CoverHtml}}
+//go:generate go test -cpuprofile={{.Files.CpuProf}} -count={{.CPUTestCount}} {{.ModName}} -memprofile={{.Files.MemProf}} -memprofilerate 1 {{.ModName}} -bench -benchtime 5s
+//go:generate go tool pprof -svg -output {{.Files.MemSvg}} {{.ModName}}.test {{.Files.MemProf}}
+//go:generate go tool pprof -svg -output {{.Files.CpuSvg}} {{.ModName}}.test {{.Files.CpuProf}}

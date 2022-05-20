@@ -1,0 +1,31 @@
+{{define "results"}}
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Performance dashboard</title>
+    <script>
+      {{template "resultsScript" .}}
+    </script>
+    <style>
+      {{template "resultsStyles" .}}
+    </style>
+  </head>
+  <body style="margin:0px;" onload="loadHTMLContent(coverageReport)">
+    <div class="report-tabs">
+      <div class="report-select-tab red-tab" onclick="loadHTMLContent(coverageReport)">Coverage</div>
+      <div class="report-select-tab blue-tab" onclick="loadSVGContent(memReport)">Memory</div>
+      <div class="report-select-tab green-tab" onclick="loadSVGContent(cpuReport)">CPU</div>
+      <div class="tab-strip-filler"></div>
+      <div class="report-select-tab back-button" onclick="history.go(-1);return true;">Back</div>
+    </div>
+    <iframe 
+      id="results-frame"
+      height="100%" 
+      width="100%" 
+      frameborder="0"
+      title="CoverageReport">
+    </iframe>
+  </body>
+</html>
+{{end}}

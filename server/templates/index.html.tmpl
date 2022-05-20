@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Performance dashboard</title>
+  </head>
+  <body>
+    {{.ErrEl}}
+    <form
+      enctype="multipart/form-data"
+      target="_self"
+      action="/"
+      method="post">
+      <input type="file" name="upload" accept=".zip"/>
+      <input type="submit" value="Upload"/>
+    </form>
+  </body>
+</html>

@@ -1,0 +1,22 @@
+{{define "resultsScript"}}
+const coverageReport = parseStringByteArray("{{.Coverage}}")
+const memReport = parseStringByteArray("{{.Mem}}")
+const cpuReport = parseStringByteArray("{{.Cpu}}")
+
+function parseStringByteArray(data, separator = " ") {
+  return data.substring(1, data.length - 1).split(separator).map(c => String.fromCharCode(c)).join("")
+}
+
+function setPageContent(contentType, content) {
+  var iframe = document.getElementById("results-frame")
+  iframe.src = 'data:' + contentType + ';charset=utf-8,' + escape(content)
+}
+
+function loadHTMLContent(content) {
+  setPageContent("text/html", content)
+}
+
+function loadSVGContent(content) {
+  setPageContent("image/svg+xml", content)
+}
+{{end}}
