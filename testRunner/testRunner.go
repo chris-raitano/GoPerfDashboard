@@ -21,7 +21,17 @@ const (
 	templateFile  = "templates/testgen.go.tmpl"
 	outputDir     = "perfdashboard/out"
 	htmlDir       = "perfdashboard/html"
-	port          = 8081
+)
+
+// Environment variables
+const (
+	env_port = "TestRunnerPort"
+	env_logs = "LogFile"
+)
+
+// Defaults
+const (
+	defaultPort = "80"
 )
 
 type outFiles struct {
@@ -39,26 +49,48 @@ type templParams struct {
 	Files        outFiles
 }
 
-func main() {
-	// Send logs to file
-	file, _ := os.Create("out.log")
-	defer file.Close()
-	log.SetOutput(file)
-
-	startService()
-}
-
 type resultsHTML struct {
 	Coverage []byte
 	Mem      []byte
 	Cpu      []byte
 }
 
+func main() {
+	file := redirectLogs()
+	defer file.Close()
+
+	startService()
+}
+
+// redirectLogs redirects logs to the file specified by the log file environment variable
+func redirectLogs() *os.File {
+	lf := os.Getenv(env_logs)
+	if lf != "" {
+		file, err := os.Create(lf)
+		if err != nil {
+			log.Println(fmt.Errorf("unable to redirect logs to %v\n%w", lf, err))
+			return nil
+		}
+		log.SetOutput(file)
+		return file
+	}
+	return nil
+}
+
+// getPort determines which port to use
+func getPort() string {
+	port := os.Getenv(env_port)
+	if port == "" {
+		port = defaultPort
+	}
+	return port
+}
+
 // startService creates an HTTP server to recieve test requests
 func startService() {
 	http.HandleFunc("/", rootHandler)
 
-	addr := fmt.Sprintf(":%v", port)
+	addr := ":" + getPort()
 	if err := http.ListenAndServe(addr, nil); err != nil {
 		log.Printf("Unable to start web server. %v\n", err.Error())
 	}
@@ -145,7 +177,7 @@ func genTestData(fpaths outFiles) error {
 
 	restoreDir, err := os.Getwd()
 	if err != nil {
-		log.Printf("Unable to find current directory. %v\n", err.Error())
+		log.Printf("Unable to find current directory. %v\n", err)
 		return err
 	}
 	defer os.Chdir(restoreDir)
@@ -153,22 +185,22 @@ func genTestData(fpaths outFiles) error {
 
 	testMod, err := getModName()
 	if err != nil {
-		log.Printf("Unable to find module. %v\n", err.Error())
+		log.Printf("Unable to find module. %v\n", err)
 		return err
 	}
 
 	if err = writeTestFile(tmpl, testMod, fpaths); err != nil {
-		log.Printf("Unable to create test file. %v\n", err.Error())
+		log.Printf("Unable to create test file. %v\n", err)
 		return err
 	}
 
 	if err = createOutputDirs(); err != nil {
-		log.Printf("Unable to create output directories. %v\n\n", err.Error())
+		log.Printf("Unable to create output directories. %v\n", err)
 		return err
 	}
 
 	if err = runTests(); err != nil {
-		log.Printf("Unable to run tests. %v\n", err.Error())
+		log.Printf("Unable to run tests. %v\n", err)
 		return err
 	}
 
