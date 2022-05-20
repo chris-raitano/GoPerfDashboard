@@ -8,25 +8,53 @@ import (
 	"os"
 )
 
+// Environment variables
 const (
-	port    = 8082
-	testURL = "http://testrunner-service:8081"
+	env_port  = "DashboardPort"
+	env_trUrl = "TestRunnerUrl"
+	env_logs  = "LogFile"
+)
+
+// Defaults
+const (
+	defaultPort = "80"
 )
 
 func main() {
-	// Send logs to file
-	file, _ := os.Create("out.log")
+	file := redirectLogs()
 	defer file.Close()
-	log.SetOutput(file)
-
 	serve()
+}
+
+// redirectLogs redirects logs to the file specified by the log file environment variable
+func redirectLogs() *os.File {
+	lf := os.Getenv(env_logs)
+	if lf != "" {
+		file, err := os.Create(lf)
+		if err != nil {
+			log.Println(fmt.Errorf("unable to redirect logs to %v\n%w", lf, err))
+			return nil
+		}
+		log.SetOutput(file)
+		return file
+	}
+	return nil
+}
+
+// getPort determines which port to use
+func getPort() string {
+	port := os.Getenv(env_port)
+	if port == "" {
+		port = defaultPort
+	}
+	return port
 }
 
 // serve creates an HTTP server to host the dashboard
 func serve() {
 	http.HandleFunc("/", rootHandler)
 
-	addr := fmt.Sprintf(":%v", port)
+	addr := ":" + getPort()
 	if err := http.ListenAndServe(addr, nil); err != nil {
 		log.Printf("Unable to start web server. %v\n", err.Error())
 	}
@@ -44,8 +72,14 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 
 // uploadHandler handles file upload requests.
 func uploadHandler(w http.ResponseWriter, r *http.Request) {
+	// Get test runner url
+	trURL := os.Getenv(env_trUrl)
+	if trURL == "" {
+		panic("Test Runner URL not set. Can't run tests.")
+	}
+
 	// Forward request to test runner
-	req, err := http.NewRequest("POST", testURL, r.Body)
+	req, err := http.NewRequest("POST", trURL, r.Body)
 	if err != nil {
 		handleUploadError("Unable to create test request.", err, w, r)
 	}

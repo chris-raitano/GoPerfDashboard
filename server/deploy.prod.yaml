@@ -1,3 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: webapp-env
+data:
+  DashboardPort: "80"
+  TestRunnerUrl: "http://testrunner-service:80"
+  LogFile: "out.log"
+
+---
+
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -15,7 +26,7 @@ spec:
           service:
             name: webapp-service
             port:
-              number: 8082
+              number: 80
 
 ---
 
@@ -28,7 +39,7 @@ spec:
     app: webapp
   ports:
     - protocol: TCP
-      port: 8082
+      port: 80
 
 ---
 
@@ -43,6 +54,11 @@ spec:
   selector:
     matchLabels:
       app: webapp
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
   template:
     metadata:
       labels:
@@ -50,7 +66,10 @@ spec:
     spec:
       containers:
       - image: go_perf_dashboard_server
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         name: go-perf-dashboard-server
         ports:
-        - containerPort: 8082
+        - containerPort: 80
+        envFrom:
+        - configMapRef:
+            name: webapp-env
