@@ -1,18 +1,11 @@
 package main
 
 import (
-	"fmt"
-	"io/ioutil"
+	"goperfordashboard/webserver/env"
+	"goperfordashboard/webserver/requesthandlers"
 	"log"
 	"net/http"
 	"os"
-)
-
-// Environment variables
-const (
-	env_port  = "DashboardPort"
-	env_trUrl = "TestRunnerUrl"
-	env_logs  = "LogFile"
 )
 
 // Defaults
@@ -21,18 +14,22 @@ const (
 )
 
 func main() {
-	file := redirectLogs()
+	file := configureLogs()
 	defer file.Close()
 	serve()
 }
 
-// redirectLogs redirects logs to the file specified by the log file environment variable
-func redirectLogs() *os.File {
-	lf := os.Getenv(env_logs)
+// configureLogs onfigures the log package output
+func configureLogs() *os.File {
+	// Display line numbers
+	log.SetFlags(log.LstdFlags | log.Llongfile)
+
+	// Redirect to log file provided in env variable
+	lf := os.Getenv(env.LOG_FILE)
 	if lf != "" {
 		file, err := os.Create(lf)
 		if err != nil {
-			log.Println(fmt.Errorf("unable to redirect logs to %v\n%w", lf, err))
+			log.Printf("Unable to redirect logs to %v\n%v\n", lf, err)
 			return nil
 		}
 		log.SetOutput(file)
@@ -43,7 +40,7 @@ func redirectLogs() *os.File {
 
 // getPort determines which port to use
 func getPort() string {
-	port := os.Getenv(env_port)
+	port := os.Getenv(env.PORT)
 	if port == "" {
 		port = defaultPort
 	}
@@ -56,7 +53,7 @@ func serve() {
 
 	addr := ":" + getPort()
 	if err := http.ListenAndServe(addr, nil); err != nil {
-		log.Printf("Unable to start web server. %v\n", err.Error())
+		log.Printf("unable to start web server\n%v\n", err)
 	}
 }
 
@@ -64,52 +61,8 @@ func serve() {
 func rootHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "POST":
-		uploadHandler(w, r)
+		requesthandlers.PostUpload(w, r)
 	case "GET":
-		fileUploadPage(w, r, "")
+		requesthandlers.GetUploadPage(w, r, "")
 	}
-}
-
-// uploadHandler handles file upload requests.
-func uploadHandler(w http.ResponseWriter, r *http.Request) {
-	// Get test runner url
-	trURL := os.Getenv(env_trUrl)
-	if trURL == "" {
-		panic("Test Runner URL not set. Can't run tests.")
-	}
-
-	// Forward request to test runner
-	req, err := http.NewRequest("POST", trURL, r.Body)
-	if err != nil {
-		handleUploadError("Unable to create test request.", err, w, r)
-	}
-	req.Header = r.Header
-	client := &http.Client{}
-	res, err := client.Do(req)
-
-	if err != nil {
-		handleUploadError("Unable to run tests.", err, w, r)
-	}
-
-	// Redirect to results page on success
-	b, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		log.Printf("Unable to read test result. %v", err)
-	}
-	viewResultsPage(w, r, b)
-}
-
-// handleUploadError handles file upload errors and reloads the indexc page
-func handleUploadError(msg string, err error, w http.ResponseWriter, r *http.Request) {
-	htmlMsg := fmt.Sprintf("%v %v\n", msg, err)
-	if htmlMsg == "" {
-		htmlMsg = "An unknown error occurred"
-	}
-	// Format message
-	htmlMsg = fmt.Sprintf("<div class=\"err-msg\">%v</div>", htmlMsg)
-
-	errStr := fmt.Errorf("%v %w", msg, err)
-	log.Println(errStr)
-	// reload upload page on error
-	fileUploadPage(w, r, htmlMsg)
 }
