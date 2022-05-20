@@ -1,4 +1,4 @@
-package main
+package fileops
 
 import (
 	"archive/zip"
@@ -12,7 +12,7 @@ import (
 )
 
 // copyFile copies a file to the current directory.
-func copyFile(file multipart.File, header *multipart.FileHeader) error {
+func CopyFile(file multipart.File, header *multipart.FileHeader) error {
 	dstFile, err := os.Create(header.Filename)
 	if err != nil {
 		return err
@@ -27,7 +27,7 @@ func copyFile(file multipart.File, header *multipart.FileHeader) error {
 }
 
 // extractZip extracts a .zip file in the current directory
-func extractZip(fname string) error {
+func ExtractZip(fname string) error {
 	zipFile, err := zip.OpenReader(fname)
 	if err != nil {
 		return err
@@ -94,11 +94,10 @@ func extractFileFromZip(f *zip.File) error {
 }
 
 // readf reads a single file into a []byte
-func readf(filename string) ([]byte, error) {
+func Readf(filename string) ([]byte, error) {
 	content, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return nil, err
 	}
-
 	return content, nil
 }
