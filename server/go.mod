@@ -1,3 +1,3 @@
-module goperfordashboard/webserver
+module goperfdashboard/webserver
 
 go 1.18

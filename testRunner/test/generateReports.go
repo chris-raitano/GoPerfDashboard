@@ -1,7 +1,7 @@
 package test
 
 import (
-	"goperfordashboard/testrunner/fileops"
+	"goperfdashboard/testrunner/fileops"
 	"html/template"
 	"log"
 	"os"

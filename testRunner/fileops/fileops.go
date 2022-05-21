@@ -5,15 +5,14 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"mime/multipart"
 	"os"
 	"path/filepath"
 	"strings"
 )
 
 // copyFile copies a file to the current directory.
-func CopyFile(file multipart.File, header *multipart.FileHeader) error {
-	dstFile, err := os.Create(header.Filename)
+func CopyFile(file io.Reader, filename string) error {
+	dstFile, err := os.Create(filename)
 	if err != nil {
 		return err
 	}

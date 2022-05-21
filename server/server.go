@@ -1,8 +1,8 @@
 package main
 
 import (
-	"goperfordashboard/webserver/env"
-	"goperfordashboard/webserver/requesthandlers"
+	"goperfdashboard/webserver/env"
+	"goperfdashboard/webserver/requesthandlers"
 	"log"
 	"net/http"
 	"os"

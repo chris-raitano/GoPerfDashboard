@@ -3,10 +3,10 @@ package requesthandlers
 import (
 	"encoding/json"
 	"errors"
-	"goperfordashboard/testrunner/fileops"
-	"goperfordashboard/testrunner/test"
+	"goperfdashboard/testrunner/fileops"
+	"goperfdashboard/testrunner/test"
+	"io"
 	"log"
-	"mime/multipart"
 	"net/http"
 	"path/filepath"
 )
@@ -17,16 +17,14 @@ const (
 
 // PostModuleUpload handles module uploads and generates reports for the tests
 func PostModuleUpload(w http.ResponseWriter, r *http.Request) {
-	// Retrieve the file from form data
-	r.ParseMultipartForm(maxUploadSize)
-	file, header, err := r.FormFile("upload")
-	if err != nil {
-		log.Printf("Unable to get file from request body\n%v\n", err)
+
+	// Extract file to disk
+	fname := r.Header.Get("filename")
+	if fname == "" {
+		log.Println("Unable to read file name")
 		return
 	}
-	defer file.Close()
-	// Extract file to disk
-	if err := extractFile(file, header); err != nil {
+	if err := extractFile(r.Body, fname); err != nil {
 		log.Printf("Unalbe to extract file to disk\n%v\n", err)
 		return
 	}
@@ -47,22 +45,22 @@ func PostModuleUpload(w http.ResponseWriter, r *http.Request) {
 }
 
 // extractFile reads a .zip file from the request and extracts it onto the local filesystem
-func extractFile(file multipart.File, header *multipart.FileHeader) error {
+func extractFile(file io.Reader, filename string) error {
 	// Only accept zip files
-	if ext := filepath.Ext(header.Filename); ext != ".zip" {
+	if ext := filepath.Ext(filename); ext != ".zip" {
 		err := errors.New("invalid filetype")
 		log.Printf("Invalid filetype uploaded: %v.", ext)
 		return err
 	}
 
 	// Copy to filesystem
-	if err := fileops.CopyFile(file, header); err != nil {
+	if err := fileops.CopyFile(file, filename); err != nil {
 		log.Printf("Unable to create local copy of uploaded file.")
 		return err
 	}
 
 	// Extract zip file
-	if err := fileops.ExtractZip(header.Filename); err != nil {
+	if err := fileops.ExtractZip(filename); err != nil {
 		log.Printf("An error occurred extracting the zip file.")
 		return err
 	}

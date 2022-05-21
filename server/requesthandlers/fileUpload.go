@@ -2,7 +2,7 @@ package requesthandlers
 
 import (
 	"fmt"
-	"goperfordashboard/webserver/env"
+	"goperfdashboard/webserver/env"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -13,6 +13,10 @@ import (
 type uploadPageTmplParams struct {
 	ErrEl string
 }
+
+const (
+	maxUploadSize = 50 << 20 // 50 MB
+)
 
 // GetUploadPage loads the go module upload page
 func GetUploadPage(w http.ResponseWriter, r *http.Request, errMsg string) {
@@ -32,12 +36,24 @@ func PostUpload(w http.ResponseWriter, r *http.Request) {
 		panic("Test Runner URL not set. Can't run tests.")
 	}
 
-	// Forward request to test runner
-	req, err := http.NewRequest("POST", trURL, r.Body)
+	// Retrieve the file from form data
+	r.ParseMultipartForm(maxUploadSize)
+	file, fheader, err := r.FormFile("upload")
+	if err != nil {
+		log.Printf("Unable to get file from request body\n%v\n", err)
+		return
+	}
+	defer file.Close()
+
+	// Create request for test runner
+	req, err := http.NewRequest("POST", trURL, file)
 	if err != nil {
 		handleUploadError("Unable to create test request.", err, w, r)
 	}
 	req.Header = r.Header
+	req.Header.Add("filename", fheader.Filename)
+
+	// Send request
 	client := &http.Client{}
 	res, err := client.Do(req)
 

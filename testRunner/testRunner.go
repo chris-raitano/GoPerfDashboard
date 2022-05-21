@@ -1,8 +1,8 @@
 package main
 
 import (
-	"goperfordashboard/testrunner/env"
-	"goperfordashboard/testrunner/requesthandlers"
+	"goperfdashboard/testrunner/env"
+	"goperfdashboard/testrunner/requesthandlers"
 	"log"
 	"net/http"
 	"os"
