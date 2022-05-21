@@ -11,10 +11,6 @@ import (
 	"path/filepath"
 )
 
-const (
-	maxUploadSize = 50 << 20 // 50 MB
-)
-
 // PostModuleUpload handles module uploads and generates reports for the tests
 func PostModuleUpload(w http.ResponseWriter, r *http.Request) {
 
